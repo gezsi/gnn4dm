@@ -65,7 +65,7 @@ To train GNN4DM using the original data from the paper, you should use the follo
 log-transformed gene-level p-values from the GWAS Atlas project, filtered to the non-UKB specific GWAS summary statistics, and transformed with PCA to get the first 512 principal components.)  
 [data/StringDB/centrality_measures.txt](data/StringDB/centrality_measures.txt) (Various centrality measures computed on the STRING PPI graph.)  
 
---pathway_databases: 
+--pathway_databases:  
 [data/MSigDB/biocarta_ensembl.gmt](data/MSigDB/biocarta_ensembl.gmt) (BioCarta pathway annotations mapped to Ensembl gene identifiers.)  
 [data/MSigDB/kegg_ensembl.gmt](data/MSigDB/kegg_ensembl.gmt) (KEGG pathway annotations mapped to Ensembl gene identifiers.)  
 [data/MSigDB/reactome_ensembl.gmt](data/MSigDB/reactome_ensembl.gmt) (Reactome pathway annotations mapped to Ensembl gene identifiers.)  
