@@ -34,6 +34,8 @@ def getSTRING( cutoff = 700 ):
     # select the largest connected component
     STRING = nx.subgraph(STRING, max(nx.connected_components(STRING), key=len))
 
+    nx.write_edgelist( STRING, "./data/StringDB/STRING_v12_edgelist.txt", data=False, delimiter='\t' )
+
     print( f'Network: {STRING.name}' )
     print( f'Number of nodes = {nx.number_of_nodes(STRING)}' )
     print( f'Number of edges = {nx.number_of_edges(STRING)}' )
@@ -90,6 +92,12 @@ def getGTExFeatures( STRING ):
             # If the node is not in "m," fill the row with column-wise mean values
             aligned_df.loc[node] = columnwise_mean
             n_missing += 1
+
+    aligned_df.astype(float).to_csv('./data/GTEx/GTEx_2017-06-05_v8_RNASeQCv1.1.9_gene_median_tpm_processed.txt', 
+                      sep='\t', 
+                      index=True, 
+                      header=False,
+                      float_format='%.4f')
 
     # Step 4: Convert the aligned DataFrame to a numpy matrix
     gtex_aligned_matrix = aligned_df.to_numpy()
@@ -219,6 +227,12 @@ def getGWASAtlasFeatures( STRING, filter : str = None, performPCA : bool = True,
                 # If the node is not in "m," fill the row with column-wise mean values
                 aligned_df.loc[node] = columnwise_mean
                 n_missing += 1
+
+        aligned_df.astype(float).to_csv(f"./data/GWASAtlas/gwasATLAS_v20191115_magma_P_{filter}_{performPCA}{num_components if performPCA else ''}_processed.txt", 
+                          sep='\t', 
+                          index=True, 
+                          header=False,
+                          float_format='%.4f')
 
         # Step 4: Convert the aligned DataFrame to a numpy matrix (if needed)
         gwasatlas_aligned_matrix = aligned_df.to_numpy()

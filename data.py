@@ -13,7 +13,7 @@ from cdlib import NodeClustering
 
 from read_string import *
 
-def compute_centrality_measure_features( G : nx.Graph, dataset_name : str ):
+def compute_centrality_measure_features_old( G : nx.Graph, dataset_name : str ):
 
     dataset_filename = "./data/" + dataset_name + "_centrality_measure.npy"
 
@@ -38,6 +38,50 @@ def compute_centrality_measure_features( G : nx.Graph, dataset_name : str ):
 
         with open(dataset_filename, 'wb') as f:
             np.save(f, embedding)
+
+        aligned_df = pd.DataFrame( embedding, 
+                                   columns=['degree_centrality', 'eigenvector_centrality', 'closeness_centrality', 'betweenness_centrality', 'pagerank'], 
+                                   index=list(G.nodes) )
+        aligned_df.to_csv(f"./data/StringDB/centrality_measures.txt", sep='\t', index=True)
+
+    assert embedding.shape[0] == G.number_of_nodes()
+
+    return embedding
+
+def compute_centrality_measure_features( G : nx.Graph, dataset_name : str ):
+
+    dataset_filename = "./data/" + dataset_name + "_centrality_measure.npy"
+
+    if os.path.exists( dataset_filename ):
+        with open(dataset_filename, 'rb') as f:
+            embedding = np.load(f)
+    else:
+        node_dict = dict( zip( list(G.nodes), range(len(G.nodes)) ) )
+
+        dc = nx.degree_centrality(G)
+        ec = nx.eigenvector_centrality(G)
+        cc = nx.closeness_centrality(G)
+        bc = nx.betweenness_centrality(G)
+        pr = nx.pagerank(G)
+
+        structural_features = [dc, ec, cc, bc, pr]
+
+        embedding = np.zeros( (G.number_of_nodes(), len(structural_features)) )
+        for i, structural_feature in enumerate(structural_features):
+            for key, value in structural_feature.items():
+                embedding[node_dict[key],i] = value
+
+        with open(dataset_filename, 'wb') as f:
+            np.save(f, embedding)
+
+        aligned_df = pd.DataFrame( embedding, 
+                                   columns=['degree_centrality', 'eigenvector_centrality', 'closeness_centrality', 'betweenness_centrality', 'pagerank'], 
+                                   index=list(G.nodes) )
+        aligned_df.to_csv(f"./data/StringDB/centrality_measures.txt", 
+                          sep='\t', 
+                          index=True, 
+                          header=False,
+                          float_format='%.6f')
 
     assert embedding.shape[0] == G.number_of_nodes()
 
@@ -89,7 +133,7 @@ def get_STRING_dataset( inputFeatures : list = None, outputFeatures : list = Non
         elif method == 'GWASAtlas_ukb':
             features.append( getGWASAtlasFeatures( STRING=STRING, filter = 'ukb', performPCA = False ) )
         elif method == 'centrality_measures':
-            features.append( compute_centrality_measure_features( G, "STRING" ) )
+            features.append( compute_centrality_measure_features( STRING, "STRING" ) )
 
         # Record end time
         end_time = time.time()
@@ -126,27 +170,28 @@ def get_STRING_dataset( inputFeatures : list = None, outputFeatures : list = Non
 
 
 def show_dataset( dataset ):
-    name = "Dataset: " + dataset['graph'].name
-    print('=' * len(name))
-    print(name)
-    print('=' * len(name))
-    print()
-    print(dataset['data'])
-    print('=' * len(dataset['data'].__str__()))
+    # name = "Dataset: " + dataset['graph'].name
+    # print('=' * len(name))
+    # print(name)
+    # print('=' * len(name))
+    # print()
+    # print(dataset['data'])
+    # print()
 
     # Gather some statistics about the graph.
-    print(f"Number of nodes: {dataset['data'].num_nodes}")
-    print(f"Number of edges: {dataset['data'].num_edges}")
-    print(f"Number of node features: {dataset['data'].num_node_features}")
+    print(f"Some statistics about the graph:")
+    print(f"-Number of nodes: {dataset['data'].num_nodes}")
+    print(f"-Number of edges: {dataset['data'].num_edges}")
+    print(f"-Number of node features: {dataset['data'].num_node_features}")
     if hasattr(dataset['data'], 'x_structural'):
-        print(f"Number of structural node features: {dataset['data'].x_structural.shape[1]}")
-    print(f"Average node degree: {dataset['data'].num_edges / dataset['data'].num_nodes:.2f}")
-    print(f"Has isolated nodes: {dataset['data'].has_isolated_nodes()}")
-    print(f"Has self-loops: {dataset['data'].has_self_loops()}")
-    print(f"Is undirected: {dataset['data'].is_undirected()}")
+        print(f"-Number of structural node features: {dataset['data'].x_structural.shape[1]}")
+    print(f"-Average node degree: {dataset['data'].num_edges / dataset['data'].num_nodes:.2f}")
+    print(f"-Has isolated nodes: {dataset['data'].has_isolated_nodes()}")
+    print(f"-Has self-loops: {dataset['data'].has_self_loops()}")
+    print(f"-Is undirected: {dataset['data'].is_undirected()}")
     if dataset['data'].is_undirected():
-        print(f"Is connected: {nx.is_connected(dataset['graph'])}")
-        print(f"Number of connected components: {nx.number_connected_components(dataset['graph'])}")
+        print(f"-Is connected: {nx.is_connected(dataset['graph'])}")
+        print(f"-Number of connected components: {nx.number_connected_components(dataset['graph'])}")
 
     if 'groundtruth_communities' in dataset:
         print()

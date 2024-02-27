@@ -404,8 +404,8 @@ class GAEL(torch.nn.Module):
                     # special cases as not decayed
                     no_decay.add(fpn)
 
-        print( f"decay: {str(decay)}")
-        print( f"no_decay: {str(no_decay)}")
+        #print( f"decay: {str(decay)}")
+        #print( f"no_decay: {str(no_decay)}")
 
         # validate that we considered every parameter
         param_dict = {pn: p for pn, p in self.named_parameters()}
@@ -417,11 +417,11 @@ class GAEL(torch.nn.Module):
 
         # create the pytorch optimizer object
         optim_groups = [
-            {"params": [param_dict[pn] for pn in sorted(list(decay))], "weight_decay": params['weight_decay']},
+            {"params": [param_dict[pn] for pn in sorted(list(decay))], "weight_decay": params.weight_decay},
             {"params": [param_dict[pn] for pn in sorted(list(no_decay))], "weight_decay": 0.0},
         ]
-        optimizer = torch.optim.AdamW(optim_groups, lr=params['learning_rate'])
-        scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=params['learning_rate_decay_step_size'], gamma=0.85)
+        optimizer = torch.optim.AdamW(optim_groups, lr=params.learning_rate)
+        scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=params.learning_rate_decay_step_size, gamma=0.85)
 
         return optimizer, scheduler
 

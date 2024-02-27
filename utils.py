@@ -10,6 +10,12 @@ import json
 import torch
 import torch.nn.functional as FN
 
+import os
+
+def get_filename_without_extension(file_path):
+    base_name = os.path.basename(file_path)  # Extract the filename from the path
+    file_name_without_extension, _ = os.path.splitext(base_name)  # Split the filename and extension
+    return file_name_without_extension
 
 def cosine_similarity(a, b, eps=1e-8):
     """
@@ -178,3 +184,33 @@ def saveResultsToJSON( internal_evaluation_scores, communities, filename : str, 
     # Open the file in append mode
     with open(filename, "wt") as file:
         file.write(merged_json_string)
+
+def saveResultsToJSON2( internal_evaluation_scores, filename : str ):
+    
+    # Step 2: Convert NumPy int64 to Python int
+    existing_dict_converted = {key: int(value) if isinstance(value, np.int64) else value for key, value in internal_evaluation_scores.items()}
+
+    # Optionally, convert merged dictionary back to JSON-formatted string
+    merged_json_string = json.dumps(existing_dict_converted)
+
+    # Open the file in append mode
+    with open(filename, "wt") as file:
+        file.write(merged_json_string)
+
+def exportCommunitiesToGMT( communities, filename : str, node_index_dict ):
+
+    module_names = list()
+    # Open the file for writing
+    with open(filename, "w") as file:
+        for index, gene_set in enumerate(communities, start=1):
+            module_names.append( f"Module_{index}" )
+            if len(gene_set) > 0:
+                # Join all elements of the sub-list into a single string separated by tabs
+                line = f"Module_{index}\tModule_{index}\t" + "\t".join([node_index_dict[int(value)] for value in gene_set]) + "\n"
+                # Write the line to the file
+                file.write(line)
+            
+    return module_names
+
+
+    
